@@ -1,23 +1,24 @@
 from flask import Flask, render_template, request,jsonify
-from flask_cors import CORS,cross_origin
+from flask_cors import CORS,cross_origin#required for deployment
 import requests
 from bs4 import BeautifulSoup as bs
 from urllib.request import urlopen as uReq
 
 app = Flask(__name__)
 
-@app.route('/',methods=['GET'])  # route to display the home page
-@cross_origin()
+@app.route('/',methods=['GET'])  # route to display the home page.'/' is the base url and then we will hit the localhost,port number
+@cross_origin()#not required for local deployment
 def homePage():
-    return render_template("index.html")
+    return render_template("index.html")#to render the html,css page
 
 @app.route('/review',methods=['POST','GET']) # route to show the review comments in a web UI
 @cross_origin()
-def index():
-    if request.method == 'POST':
+def index():#The things we search will be the input to this function
+    if request.method == 'POST':#data will nnot be visible in the url
         try:
-            searchString = request.form['content'].replace(" ","")
-            flipkart_url = "https://www.flipkart.com/search?q=" + searchString
+            searchString = request.form['content'].replace(" ","")#whatever the data we will enter it will be in text box.If it contains
+            #more than 1 words then the spacebar will be replaced by null.That string we will get in SearchString
+            flipkart_url = "https://www.flipkart.com/search?q=" + searchString#append with the url
             uClient = uReq(flipkart_url)
             flipkartPage = uClient.read()
             uClient.close()
@@ -27,7 +28,7 @@ def index():
             box = bigboxes[0]
             productLink = "https://www.flipkart.com" + box.div.div.div.a['href']
             prodRes = requests.get(productLink)
-            prodRes.encoding='utf-8'
+            prodRes.encoding='utf-8'#translate any Unicode character to a matching unique binary string, and can also translate the binary string back to a Unicode character.
             prod_html = bs(prodRes.text, "html.parser")
             print(prod_html)
             commentboxes = prod_html.find_all('div', {'class': "_16PBlm"})
